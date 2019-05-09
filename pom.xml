@@ -44,6 +44,11 @@
 			<artifactId>arangodb-spring-data</artifactId>
 			<version>3.2.2-SNAPSHOT</version>
 		</dependency>
+		<dependency>
+			<groupId>org.apache.httpcomponents</groupId>
+			<artifactId>httpclient</artifactId>
+			<version>4.5.1</version>
+		</dependency>
 
 	</dependencies>
 

@@ -32,6 +32,7 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Sort;
 
+import com.arangodb.spring.demo.TenantProvider;
 import com.arangodb.spring.demo.entity.Character;
 import com.arangodb.spring.demo.repository.CharacterRepository;
 import com.arangodb.springframework.core.ArangoOperations;
@@ -45,14 +46,20 @@ public class CrudRunner implements CommandLineRunner {
 
 	@Autowired
 	private ArangoOperations operations;
+
 	@Autowired
 	private CharacterRepository repository;
 
+	@Autowired
+	TenantProvider tenantProvider;
 
 	@Override
 	public void run(final String... args) throws Exception {
 		// first drop the database so that we can run this multiple times with the same
 		// dataset
+		
+
+		tenantProvider.setId("db1");
 		operations.dropDatabase();
 
 		System.out.println("# CRUD operations");
@@ -64,50 +71,60 @@ public class CrudRunner implements CommandLineRunner {
 		// the generated id from the database is set in the original entity
 		System.out.println(String.format("Ned Stark saved in the database with id: '%s'", nedStark.getId()));
 
-		// lets take a look whether we can find Ned Stark in the database
-		final Character foundNed = repository.findById(nedStark.getId()).get();
-		System.out.println(String.format("Found %s", foundNed));
+//		// lets take a look whether we can find Ned Stark in the database
+//		final Character foundNed = repository.findById(nedStark.getId()).get();
+//		System.out.println(String.format("Found %s", foundNed));
+//
+//		// as everyone probably knows Ned Stark died in the first season.
+//		// So we have to update his 'alive' flag
+//		nedStark.setAlive(false);
+//		repository.save(nedStark);
+//		final Character deadNed = repository.findById(nedStark.getId()).get();
+//		System.out.println(String.format("Ned Stark after 'alive' flag was updated: %s", deadNed));
 
-		// as everyone probably knows Ned Stark died in the first season.
-		// So we have to update his 'alive' flag
-		nedStark.setAlive(false);
-		repository.save(nedStark);
-		final Character deadNed = repository.findById(nedStark.getId()).get();
-		System.out.println(String.format("Ned Stark after 'alive' flag was updated: %s", deadNed));
+//		// lets save some additional characters
+//		final Collection<Character> createCharacters = createCharacters();
+//		System.out.println(String.format("Save %s additional characters", createCharacters.size()));
+//		repository.saveAll(createCharacters);
+//
+//		final Iterable<Character> all = repository.findAll();
+//		final long count = StreamSupport.stream(Spliterators.spliteratorUnknownSize(all.iterator(), 0), false).count();
+//		System.out.println(String.format("A total of %s characters are persisted in the database", count));
+//
+//		System.out.println("## Return all characters sorted by name");
+//		final Iterable<Character> allSorted = repository.findAll(new Sort(Sort.Direction.ASC, "name"));
+//		allSorted.forEach(System.out::println);
+//
+//		System.out.println("## Return the first 5 characters sorted by name");
+//		final Page<Character> first5Sorted = repository
+//				.findAll(PageRequest.of(0, 5, new Sort(Sort.Direction.ASC, "name")));
+//		first5Sorted.forEach(System.out::println);
 
-		// lets save some additional characters
-		final Collection<Character> createCharacters = createCharacters();
-		System.out.println(String.format("Save %s additional characters", createCharacters.size()));
-		repository.saveAll(createCharacters);
-
-		final Iterable<Character> all = repository.findAll();
-		final long count = StreamSupport.stream(Spliterators.spliteratorUnknownSize(all.iterator(), 0), false).count();
-		System.out.println(String.format("A total of %s characters are persisted in the database", count));
-
-		System.out.println("## Return all characters sorted by name");
-		final Iterable<Character> allSorted = repository.findAll(new Sort(Sort.Direction.ASC, "name"));
-		allSorted.forEach(System.out::println);
-
-		System.out.println("## Return the first 5 characters sorted by name");
-		final Page<Character> first5Sorted = repository
-				.findAll(PageRequest.of(0, 5, new Sort(Sort.Direction.ASC, "name")));
-		first5Sorted.forEach(System.out::println);
-
+		tenantProvider.setId("db2");
+		operations.dropDatabase();
 //		Collection<String> dbs = operations.driver().getDatabases();
 //		if (!dbs.contains("db2")) {
 //			operations.driver().createDatabase("db2");	
-////			operations.driver().db().createCollection("characters");
 //		}
+//		if(!operations.driver().db("db2").collection("characters").exists()) {
+//			operations.driver().db("db2").createCollection("characters");
+//		}
+//		
+//		ArangoMultiTenancyTestConfiguration
+
 //		ArangoDatabase a = operations.driver().db("db2");
 //		arangoTemplate.driver().db().
 //		operations.driver().db("db2").createCollection("characters");
 //		operations.collection(Character.class).count();
 //		demoConfiguration1.changeCurrentDB("db2");
-		operations.changeDatabaseName("db2");
-		operations.dropDatabase();
+//		operations.changeDatabaseName("db2");
+		System.out.println("--------------");
+
+//		operations.dropDatabase();
 		final Character nedStark2 = new Character("Ned", "Stark", true, 51);
 		repository.save(nedStark2);
-		operations.changeDatabaseName("spring-demo");
+		System.out.println("--------------");
+//		operations.changeDatabaseName("spring-demo");
 	}
 
 	public static Collection<Character> createCharacters() {
